@@ -217,6 +217,8 @@ table.dwm_main {clear: both; width: 100%; border-spacing: 0; border-collapse: se
 
 td.new a, a.new_booking {display: block; font-size: medium; text-align: center}
 td.new img, .new_booking img {margin: auto; padding: 4px 0 2px 0}
+a.plainlink {display: inline; padding: 0px !important; font-weight: normal; }
+div.room_details { padding-left: 6px; padding-bottom: 3px; }
 img.repeat_symbol {float: right; padding: 3px}
 .dwm_main#month_main img.repeat_symbol {padding: 2px}
 
@@ -256,7 +258,7 @@ div.booking_list {position: relative; z-index: 20;                      /* conta
 foreach ($color_types as $type => $col)
 {
   echo "td.$type {background-color: $col}\n";         // used in the day and week views
-  echo ".month div.$type {float: left; max-height: 1.3em; height: 1.3em; min-height: 1.3em; overflow: hidden; background-color: $col}\n";   // used in the month view
+  echo ".month div.$type {float: left; min-height: 1.3em; overflow: hidden; background-color: $col}\n";   // used in the month view
 }
 
 ?>

@@ -26,7 +26,7 @@ else
 {
   $params = "&amp;area=$area";
 }
-  if (!empty($room))
+  if (!empty($room) && $room_selected)
 {
   $params .= "&amp;room=$room";
 }

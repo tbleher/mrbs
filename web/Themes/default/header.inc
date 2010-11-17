@@ -3187,7 +3187,7 @@ $(window).load(function() {
             {
               echo "<input type=\"hidden\" name=\"area\" value=\"$area\">\n";
             }
-            if (!empty($room))
+            if (!empty($room) && $room_selected)
             {
               echo "<input type=\"hidden\" name=\"room\" value=\"$room\">\n";
             }
@@ -3239,7 +3239,7 @@ $(window).load(function() {
       {
         $query_str .= "&amp;area=$area";
       }
-      if (!empty($room))
+      if (!empty($room) && $room_selected)
       {
         $query_str .= "&amp;room=$room";
       }

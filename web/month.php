@@ -95,10 +95,10 @@ $room_invalid = ($this_area_name === -1) || ($this_room_name === -1);
 // Show all available areas
 echo make_area_select_html('month.php', $area, $year, $month, $day);  
 // Show all available rooms in the current area:
-echo make_room_select_html('month.php', $area, $room, $year, $month, $day);
+echo make_room_select_html('month.php', $area, $room_selected ? $room : "", $year, $month, $day);
     
 // Draw the three month calendars
-minicals($year, $month, $day, $area, $room, 'month');
+minicals($year, $month, $day, $area, $room_selected ? $room : "", 'month');
 echo "</div>\n";
 
 // End of "screenonly" div
@@ -114,9 +114,10 @@ if ($room_invalid)
 }
 
 // Show Month, Year, Area, Room header:
+$this_page_title = $room_selected ? "$this_area_name - $this_room_name" : $this_area_name;
 echo "<div id=\"dwm\">\n";
 echo "<h2>" . utf8_strftime($strftime_format['monthyear'], $month_start)
-  . " - " . htmlspecialchars("$this_area_name - $this_room_name") . "</h2>\n";
+  . " - " . htmlspecialchars($this_page_title) . "</h2>\n";
 echo "</div>\n";
 
 // Show Go to month before and after links
@@ -151,20 +152,21 @@ while (!checkdate($cm, $cd, $cy) && ($cd > 1))
 }
 
 
+$room_link = $room_selected ? "&amp;room=$room" : "";
 $before_after_links_html = "<div class=\"screenonly\">
   <div class=\"date_nav\">
     <div class=\"date_before\">
-      <a href=\"month.php?year=$yy&amp;month=$ym&amp;day=$yd&amp;area=$area&amp;room=$room\">
+      <a href=\"month.php?year=$yy&amp;month=$ym&amp;day=$yd&amp;area=$area$room_link\">
           &lt;&lt;&nbsp;".get_vocab("monthbefore")."
         </a>
     </div>
     <div class=\"date_now\">
-      <a href=\"month.php?year=$cy&amp;month=$cm&amp;day=$cd&amp;area=$area&amp;room=$room\">
+      <a href=\"month.php?year=$cy&amp;month=$cm&amp;day=$cd&amp;area=$area$room_link\">
           ".get_vocab("gotothismonth")."
         </a>
     </div>
     <div class=\"date_after\">
-       <a href=\"month.php?year=$ty&amp;month=$tm&amp;day=$td&amp;area=$area&amp;room=$room\">
+       <a href=\"month.php?year=$ty&amp;month=$tm&amp;day=$td&amp;area=$area$room_link\">
           ".get_vocab("monthafter")."&nbsp;&gt;&gt;
         </a>
     </div>
@@ -189,13 +191,21 @@ $all_day = preg_replace("/ /", "&nbsp;", get_vocab("all_day"));
 // This data will be retrieved day-by-day fo the whole month
 for ($day_num = 1; $day_num<=$days_in_month; $day_num++)
 {
-  $sql = "SELECT start_time, end_time, id, name, type,
-                 repeat_id, status, create_by
-            FROM $tbl_entry
-           WHERE room_id=$room
-             AND start_time <= $midnight_tonight[$day_num] AND end_time > $midnight[$day_num]
-        ORDER BY start_time";
-
+  if( $room_selected ) {
+    $sql = "SELECT start_time, end_time, id, name, type,
+                   repeat_id, status, create_by, \"dummy\" AS room_name
+              FROM $tbl_entry
+             WHERE room_id=$room
+               AND start_time <= $midnight_tonight[$day_num] AND end_time > $midnight[$day_num]
+          ORDER BY start_time";
+  } else {
+    $sql = "SELECT start_time, end_time, $tbl_entry.id AS id, name, type,
+                   repeat_id, status, create_by, room_name
+              FROM $tbl_entry, $tbl_room
+             WHERE $tbl_room.area_id = $area AND $tbl_entry.room_id = $tbl_room.id
+               AND start_time <= $midnight_tonight[$day_num] AND end_time > $midnight[$day_num]
+          ORDER BY start_time, end_time, name, type, status, repeat_id, room_name";
+  }
   // Build an array of information about each day in the month.
   // The information is stored as:
   //  d[monthday]["id"][] = ID of each entry, for linking.
@@ -251,6 +261,8 @@ for ($day_num = 1; $day_num<=$days_in_month; $day_num++)
         $d[$day_num]["status"][] = $row['status'] & ~STATUS_PRIVATE;  // Clear the private bit
         $d[$day_num]["shortdescrip"][] = htmlspecialchars($row['name']);
       }
+
+      $d[$day_num]["room"][] = htmlspecialchars($row['room_name']);
       
 
       // Describe the start and end time, accounting for "all day"
@@ -418,7 +430,7 @@ for ($cday = 1; $cday <= $days_in_month; $cday++)
     echo "</div>\n";
     // then the link to make a new booking
     
-    $query_string = "room=$room&amp;area=$area&amp;year=$year&amp;month=$month&amp;day=$cday";
+    $query_string = "area=$area$room_link&amp;year=$year&amp;month=$month&amp;day=$cday";
     if ($enable_periods)
     {
       $query_string .= "&amp;period=0";
@@ -439,10 +451,30 @@ for ($cday = 1; $cday <= $days_in_month; $cday++)
     if (isset($d[$cday]["id"][0]))
     {
       echo "<div class=\"booking_list\">\n";
+      $rooms = "";
       $n = count($d[$cday]["id"]);
       // Show the start/stop times, 1 or 2 per line, linked to view_entry.
       for ($i = 0; $i < $n; $i++)
       {
+        if( !$room_selected ) {
+          // if no room was selected by the user, show an area overview. For
+          // this, all bookings that have the same short description and
+          // start-/end-time are accumulated into one booking
+          $booking_link = "view_entry.php?id=" . $d[$cday]["id"][$i] . "&amp;day=$cday&amp;month=$month&amp;year=$year";
+          if( $rooms != "" )
+            $rooms .= ", ";
+          $rooms .= "<a href=\"$booking_link\" class=\"plainlink\">" . htmlspecialchars($d[$cday]["room"][$i]) . "</a>";
+
+          if(    $i < $n-1
+              && $d[$cday]["shortdescrip"][$i] === $d[$cday]["shortdescrip"][$i+1]
+              && $d[$cday]["data"][$i] === $d[$cday]["data"][$i+1]
+              && $d[$cday]["color"][$i] === $d[$cday]["color"][$i+1]  
+              && $d[$cday]["status"][$i] === $d[$cday]["status"][$i+1] ) {
+            // next room has same description as our, just accumulate parameters
+            continue;
+          }
+        }
+
         // give the enclosing div the appropriate width: full width if both,
         // otherwise half-width (but use 49.9% to avoid rounding problems in some browsers)
         $class = $d[$cday]["color"][$i]; 
@@ -489,6 +521,12 @@ for ($cday = 1; $cday <= $days_in_month; $cday++)
         echo "<a href=\"$booking_link\" title=\"$full_text\">";
         echo ($d[$cday]['is_repeat'][$i]) ? "<img class=\"repeat_symbol\" src=\"images/repeat.png\" alt=\"" . get_vocab("series") . "\" title=\"" . get_vocab("series") . "\" width=\"10\" height=\"10\">" : '';
         echo "$display_text</a>\n";
+
+        if( !$room_selected ) {
+          // output all rooms that belong to this booking
+          echo "<div class=\"room_details\">(" . $rooms . ")</div>";
+          $rooms = "";
+        }
         echo "</div>\n";
       }
       echo "</div>\n";
