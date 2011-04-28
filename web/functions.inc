@@ -98,8 +98,12 @@ function print_header($day, $month, $year, $area, $room)
 // TRUE to exit afterwards
 function print_footer($and_exit)
 {
-  global $theme;
+  global $theme, $request_time;
   @include_once "Themes/$theme/footer.inc";
+
+  $now = microtime( true );
+  printf("<!-- Served in %01.3fs -->\n", ($now - $request_time));
+
   if (function_exists("print_theme_footer"))
   {
     print_theme_footer();
