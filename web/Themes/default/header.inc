@@ -3185,7 +3185,7 @@ $(window).load(function() {
         </div>
       </td>
       <td>
-        <form action="day.php" method="get" id="Form1">
+        <form action="month.php" method="get" id="Form1">
           <div>
             <?php
             // Give the form id as the optional fifth parameter because we want
