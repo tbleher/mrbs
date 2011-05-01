@@ -563,6 +563,14 @@ $(function() {
   });
 });
 
+$(document).ready(function() {
+  $('td.valid').click(function() {
+    var href = $(this).find("a.new_booking").attr("href");
+    if( href ) {
+      window.location = href;
+    }
+  });
+});
 
 <?php
 // Writes out the day, month and year values to the three hidden inputs
