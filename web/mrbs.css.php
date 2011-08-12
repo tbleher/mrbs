@@ -712,7 +712,7 @@ table#banner {width: 100%; border-spacing: 0; border-collapse: collapse;
 #banner input.date {width: 6.5em; text-align: center}
 
 table#colour_key {clear: both; border-spacing: 0; border-collapse: collapse}
-#colour_key td {width: 7.0em; padding: 2px; font-weight: bold;
+#colour_key td {min-width: 7.0em; padding: 2px; font-weight: bold;
     color: <?php echo $colour_key_font_color ?>;
     border: <?php echo $main_table_cell_border_width ?>px solid <?php echo $main_table_body_h_border_color ?>}
 #colour_key td#row_padding {border-right: 0; border-bottom: 0}
