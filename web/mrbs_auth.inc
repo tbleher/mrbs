@@ -218,6 +218,13 @@ function auth_can_edit_user($user, $target)
 //           the room; otherwise FALSE
 function auth_book_admin($user, $room)
 {
+  global $area_admins;
+  $area = get_area($room);
+  if( array_key_exists( $area, $area_admins ) ) {
+    if( array_search( $user, $area_admins[$area], true ) !== false ) {
+      return true;
+    }
+  }
   return (authGetUserLevel($user) >= 2);
 }
 ?>
