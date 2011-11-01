@@ -446,6 +446,20 @@ div.div_select.outside {
 .tentative {opacity: 0.6}
 .tentative a {font-weight: normal}
 
+/* vacations, holidays etc */
+.special_event {height: 1.4em; max-height: 1.4em; min-height: 1.4em; position: absolute; overflow: hidden; z-index: 21; outline: 1px solid <?php echo $special_event_outline_color; ?>; }
+.special_event_pos0 { top: 0; left: 18%; width: 82%; }
+<?php
+// create special classes for up to 9 events per day
+for ($i=1; $i<=9; $i++) 
+    echo ".special_event_pos$i { top: ". number_format( $i*1.4, 1, '.', '')."em; left: 0%; width: 100%; }\n";
+
+foreach( $special_events as $key => $value )
+{
+  if( isset( $value['style'] ) )
+    echo ".se-$key { {$value['style']} }\n";
+}
+?>
 
 /* ------------ DEL.PHP -----------------------------*/
 div#del_room_confirm {padding-bottom: 3em}

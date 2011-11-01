@@ -6,6 +6,7 @@
 require_once "defaultincludes.inc";
 require_once "mincals.inc";
 require_once "functions_table.inc";
+require_once "functions_ical.inc";
 
 $debug_flag = get_form_var('debug_flag', 'int');
 
@@ -183,6 +184,8 @@ if ($debug_flag)
 
 // Used below: localized "all day" text but with non-breaking spaces:
 $all_day = preg_replace("/ /", "&nbsp;", get_vocab("all_day"));
+
+$special_event_list = get_special_events($year, $month, 1, $year, $month, $days_in_month);
 
 //Get all meetings for this month in the room that we care about
 // row[0] = Start time
@@ -430,16 +433,10 @@ for ($cday = 1; $cday <= $days_in_month; $cday++)
   }
   else
   {   
-    echo "<td class=\"valid\">\n";
-    echo "<div class=\"cell_container\">\n";
+    echo "<td class='valid'>\n";
+    echo "<div class='cell_container'>\n";
     
-    echo "<div class=\"cell_header\">\n";
-    // first put in the day of the month
-    echo "<a class=\"monthday\" href=\"day.php?year=$year&amp;month=$month&amp;day=$cday&amp;area=$area\">$cday</a>\n";
-    echo "</div>\n";
-    // then the link to make a new booking
-    
-    $query_string = "area=$area$room_link&amp;year=$year&amp;month=$month&amp;day=$cday";
+    $query_string = "edit_entry.php?area=$area$room_link&amp;year=$year&amp;month=$month&amp;day=$cday";
     if ($enable_periods)
     {
       $query_string .= "&amp;period=0";
@@ -449,7 +446,38 @@ for ($cday = 1; $cday <= $days_in_month; $cday++)
       $query_string .= "&amp;hour=$morningstarts&amp;minute=0";
     }
     
-    echo "<a class=\"new_booking\" href=\"edit_entry.php?$query_string\">\n";
+    $special_event_text = '';
+    $special_event_count = 0;
+    foreach ($special_event_list as $type => &$list) {
+      $prefix = isset($special_events[$type]['prefix']) ? $special_events[$type]['prefix'] : '';
+      $suffix = isset($special_events[$type]['suffix']) ? $special_events[$type]['suffix'] : '';
+      $tooltip_prefix = isset($special_events[$type]['tooltip-prefix']) ? $special_events[$type]['tooltip-prefix'] : '';
+      $tooltip_suffix = isset($special_events[$type]['tooltip-suffix']) ? $special_events[$type]['tooltip-suffix'] : '';
+      foreach($list as $h) {
+	if (($h->getEnd() > $midnight[$cday]) && ($h->getStart() <= $midnight_tonight[$cday])) {
+	  $text = $prefix . htmlspecialchars($h->getProperty('summary')) . $suffix;
+	  $tooltip = $tooltip_prefix . htmlspecialchars($h->getProperty('summary')) . $tooltip_suffix;
+	  $text_nbsp = preg_replace(array("/ /", "/-/"), array("&nbsp;", "&#8209;"), $text);
+	  $special_event_text .= "<div class='special_event special_event_pos$special_event_count'>";
+	  $special_event_text .= "<a title=\"".$tooltip."\" href=\"$query_string\"";
+	  $special_event_text .= " class='se-$type'>".$text_nbsp."</a></div>";
+	  $special_event_count++;
+	}
+      }
+    }
+
+    echo "<div class='cell_header'";
+    if( $special_event_count > 0 )
+	echo " style='min-height: " . number_format($special_event_count*1.4, 1, '.', '')."em;'";
+    echo ">\n";
+    // first put in the day of the month
+    echo "<a class='monthday' href='day.php?year=$year&amp;month=$month&amp;day=$cday&amp;area=$area'>$cday</a>\n";
+    echo "</div>\n";
+    echo $special_event_text;
+
+    // then the link to make a new booking
+    
+    echo "<a class=\"new_booking\" href=\"$query_string\">\n";
     if ($show_plus_link)
     {
       echo "<img src=\"images/new.gif\" alt=\"New\" width=\"10\" height=\"10\">\n";

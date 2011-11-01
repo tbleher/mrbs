@@ -836,5 +836,42 @@ function export_icalendar(&$res, $keep_private, $export_end=PHP_INT_MAX)
   echo $icalendar;
 }
 
+function ical_to_event_list($file, $start_time, $end_time)
+{
+  $hd = array();
+  if (file_exists($file)) {
+    require_once "SG_iCalendar.inc";
+    $ical = new SG_iCal($file);
+
+    foreach($ical->getEvents() as $id => $hev) {
+      if ( ($hev->getStart()<=$end_time && $hev->getEnd()>=$start_time) )
+	$hd[] = $hev;
+    }
+  }
+  return $hd;
+}
+
+/**
+ * Returns all special events (eg holidays and vacations) in the given range (inclusive).
+ */
+function get_special_events($start_year, $start_month, $start_day, $end_year, $end_month, $end_day)
+{
+  global $special_events;
+
+  $start = mktime(0, 0, 0, $start_month, $start_day, $start_year);
+  $end = mktime(23, 59, 59, $end_month, $end_day, $end_year);
+
+  $ret = array();
+  foreach( $special_events as $type => $values ) {
+    $ret[$type] = array();
+    for( $year = $start_year; $year <= $end_year; ++$year ) {
+      if (isset($values['files'][$year])) {
+	$list = ical_to_event_list($values['files'][$year], $start, $end);
+	$ret[$type] = array_merge($ret[$type], $list);
+      }
+    }
+  }
+  return $ret;
+}
 
 ?>
