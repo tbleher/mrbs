@@ -592,7 +592,8 @@ div#edit_area_room_submit_save {float: left; clear: none; width: auto}
 #edit_area_room_submit_back input {float: right}
 div#edit_entry_submit_back {float: left; width: <?php echo $general_left_col_width ?>em; max-width: <?php echo $edit_entry_left_col_max_width ?>em}
 div#edit_entry_submit_save {float: left; clear: none; width: auto}
-#edit_entry_submit_back input {float: right}
+#edit_entry_submit_back > input {float: right}
+#edit_entry_submit_save > input {float: right}
 
 
 .form_general .div_dur_mins input{width: 4.0em}

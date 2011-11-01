@@ -1411,15 +1411,17 @@ foreach( $edit_entry_field_order as $key )
     // Buttons
     echo "<fieldset class=\"submit_buttons\">\n";
     echo "<legend></legend>\n";
-    // The Back button
-    echo "<div id=\"edit_entry_submit_back\">\n";
-    echo "<input class=\"submit\" type=\"submit\" name=\"back_button\" value=\"" . get_vocab("back") . "\">\n";
-    echo "</div>\n";
     
     // The Submit button
+    // The submit button comes first in the HTML source, so pressing enter inside the form properly submits the booking.
+    // In the view, the order of the two buttons is exchanged via CSS.
     echo "<div id=\"edit_entry_submit_save\">\n";
     echo "<input class=\"submit\" type=\"submit\" name=\"save_button\" value=\"" .
       get_vocab("save") . "\">\n";
+
+    // The Back button
+    echo "<div id=\"edit_entry_submit_back\">\n";
+    echo "<input class=\"submit\" type=\"submit\" name=\"back_button\" value=\"" . get_vocab("back") . "\">\n";
     echo "</div>\n";
     
     // divs to hold the results of the Ajax checking of the booking
