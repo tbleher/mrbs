@@ -494,7 +494,7 @@ $general_right_col_width       = '79';      // %  (79 to avoid rounding problems
 $general_gap                   = '1.0';     // em  (gap between left and right columns)
 
 // Specific to the "edit_entry" form
-$edit_entry_left_col_max_width = '10';      // em
+$edit_entry_left_col_max_width = '20';      // em
 $edit_entry_textarea_width     = '26';      // em
 $edit_entry_ampm_width         = '16';      // em
 $edit_entry_form_min_width     = $edit_entry_left_col_max_width + $edit_entry_textarea_width + $general_gap;
