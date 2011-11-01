@@ -544,6 +544,7 @@ if (!sql_mutex_lock("$tbl_entry"))
 // Validate the booking for (a) conflicting bookings and (b) conformance to rules
 $valid_booking = TRUE;
 $conflicts = array();     // Holds a list of all the conflicts
+$skipped_bookings = array(); // Holds a list of all the bookings that were skipped for various reasons
 $rules_broken = array();  // Holds an array of the rules that have been broken
 $skip_lists = array();    // Holds a 2D array of bookings to skip past.  Indexed
                           // by room id and start time
@@ -577,16 +578,14 @@ foreach ( $rooms as $room_id )
           // Otherwise it's an invalid booking
           if ($skip)
           {
-            $skip_lists[$room_id][] = $reps[$i];
+	    $skip_lists[$room_id][] = $reps[$i];
+	    $skipped_bookings = array_merge($skipped_bookings, $tmp);
           }
           else
           {
             $valid_booking = FALSE;
+	    $conflicts = array_merge($conflicts, $tmp);
           }
-          // In both cases remember the conflict data.   (We don't at the
-          // moment do anything with the data if we're skipping, but we might
-          // in the future want to display a list of bookings we've skipped past)
-          $conflicts = array_merge($conflicts, $tmp);
         }
         // if we're not an admin for this room, check that the booking
         // conforms to the booking policy
@@ -645,6 +644,7 @@ if ($ajax && function_exists('json_encode'))
     $result['valid_booking'] = $valid_booking;
     $result['rules_broken'] = $rules_broken;
     $result['conflicts'] = $conflicts;
+    $result['skipped_bookings'] = $skipped_bookings;
     echo json_encode($result);
     exit;
   }

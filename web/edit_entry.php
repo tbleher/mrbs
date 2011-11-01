@@ -1408,6 +1408,10 @@ foreach( $edit_entry_field_order as $key )
       echo "<input type=\"hidden\" name=\"id\" value=\"$id\">\n";
     }
 
+    // div to hold the results of the Ajax checking of the booking
+    echo "<div id=\"checks\">\n";
+    echo "</div>\n";
+
     // Buttons
     echo "<fieldset class=\"submit_buttons\">\n";
     echo "<legend></legend>\n";
@@ -1423,12 +1427,6 @@ foreach( $edit_entry_field_order as $key )
     echo "<div id=\"edit_entry_submit_back\">\n";
     echo "<input class=\"submit\" type=\"submit\" name=\"back_button\" value=\"" . get_vocab("back") . "\">\n";
     echo "</div>\n";
-    
-    // divs to hold the results of the Ajax checking of the booking
-    echo "<div id=\"conflict_check\">\n";
-    echo "</div>\n";
-    
-    echo "<div id=\"policy_check\">\n";
     echo "</div>\n";
     
     echo "</fieldset>";

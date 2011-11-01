@@ -781,49 +781,48 @@ if ($page == 'edit_entry')
           });
         
         $.post('edit_entry_handler.php', params, function(result) {
-            var conflictDiv = $('#conflict_check');
-            var scheduleDetails = $('#schedule_details');
-            var policyDetails = $('#policy_details');
+            var checksDiv = $('#checks');
             var checkMark = "\u2714";
             var cross = "\u2718";
-            var titleText, detailsHTML;
+            var checksText = '';
             if (result.conflicts.length == 0)
             {
-              conflictDiv.text(checkMark).attr('class', 'good').attr;
-              titleText = '<?php echo mrbs_entity_decode(get_vocab("no_conflicts")) ?>';
-              detailsHTML = titleText;
+              checksText += '<p>' + checkMark + ' <b><?php echo get_vocab("no_conflicts") ?></b></p>';
             }
             else
             {
-              conflictDiv.text(cross).attr('class', 'bad');
-              detailsHTML = "<p>";
-              titleText = '<?php echo mrbs_entity_decode(get_vocab("conflict")) ?>' + ":  \n\n";
-              detailsHTML += titleText + "<\/p>";
-              var conflictsList = getErrorList(result.conflicts);
-              detailsHTML += conflictsList.html;
-              titleText += conflictsList.text;
+              checksText += '<p>' + cross + ' <b><?php echo get_vocab("conflict") ?>:</b></p><ul>';
+              for (var i=0; i<result.conflicts.length; i++)
+              {
+                checksText += '<li>' + result.conflicts[i] + '</li>';
+              }
+              checksText += '</ul>';
             }
-            conflictDiv.attr('title', titleText);
-            scheduleDetails.html(detailsHTML);
-            var policyDiv = $('#policy_check');
+	    if (result.skipped_bookings.length > 0)
+	    {
+              checksText += '<p>' + checkMark + ' <b><?php echo get_vocab("skipped_bookings") ?>:</b></p><ul>';
+              for (var i=0; i<result.skipped_bookings.length; i++)
+              {
+                checksText += '<li>' + result.skipped_bookings[i] + '</li>';
+              }
+              checksText += "<\/ul>";
+	    }
             if (result.rules_broken.length == 0)
             {
-              policyDiv.text(checkMark).attr('class', 'good');
-              titleText = '<?php echo mrbs_entity_decode(get_vocab("no_rules_broken")) ?>';
-              detailsHTML = titleText;
+              checksText += '<p>' + checkMark + ' <b><?php echo get_vocab("no_rules_broken") ?></b></p>';
             }
             else
             {
-              policyDiv.text(cross).attr('class', 'bad');
-              detailsHTML = "<p>";
-              titleText = '<?php echo mrbs_entity_decode(get_vocab("rules_broken")) ?>' + ":  \n\n";
-              detailsHTML += titleText + "<\/p>";
-              var rulesList = getErrorList(result.rules_broken);
-              detailsHTML += rulesList.html;
-              titleText += rulesList.text;
+              checksText += '<p>' + cross + ' <b><?php echo get_vocab("rules_broken") ?>:</b></p><ul>';
+              for (var i=0; i<result.rules_broken.length; i++)
+              {
+                checksText += '<li>' + result.rules_broken[i] + '</li>';
+              }
+              checksText += "<\/ul>";
             }
-            policyDiv.attr('title', titleText);
-            policyDetails.html(detailsHTML);
+            checksText += '</ul>';
+            checksDiv.html(checksText);
+            checksDiv.attr('class', result.valid_booking ? 'good' : 'bad');
           }, 'json');
       }, timeout);  <?php // setTimeout() ?>
     }

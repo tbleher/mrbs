@@ -618,10 +618,9 @@ fieldset#rep_info {border-top: 1px solid <?php echo $site_faq_entry_border_color
 
 .form_general label.secondary {font-weight: normal; width: auto}
 
-div#conflict_check, div#policy_check {float: left; clear: none; width: 2em; padding: 1em 0.5em; cursor: pointer}
-div#conflict_check {margin-left: 3em}
-div.good {color: green}
-div.bad {color: red}
+div#checks {float: left; padding: 0.1em 1em; cursor: default; width: 97%; margin-top: 2em; }
+div.good {background-color: #70ff70; border-width: 3px; border-color: green; border-style: solid; }
+div.bad {background-color: #ff7070; border-width: 3px; border-color: red; border-style: solid;}
 
 
 /* ------------ EDIT_ENTRY_HANDLER.PHP ------------------*/
