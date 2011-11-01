@@ -1326,6 +1326,19 @@ foreach( $edit_entry_field_order as $key )
                 ">\n";
       echo "</div>\n";
 
+      // checkboxes for skipping past holidays, vacations etc
+      foreach( $special_events as $type => $values ) {
+	if( !$values['allow-skip'] )
+	  continue;
+
+	echo "<div>\n";
+	echo "<label for=\"skip_$type\">" . get_vocab("skip_$type") . ":</label>\n";
+	echo "<input type=\"checkbox\" class=\"checkbox\" " .
+	  "id=\"skip_$type\" name=\"skip_$type\" value=\"1\" " .
+	  (($values['skip-default']) ? " checked=\"checked\"" : "") .
+	  ">\n";
+	echo "</div>\n";
+      }
       echo "</fieldset>\n";
     }
     elseif (isset($id))

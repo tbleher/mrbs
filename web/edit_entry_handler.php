@@ -65,6 +65,14 @@ foreach($formvars as $var => $var_type)
   $$var = get_form_var($var, $var_type);
 }
 
+$skip_specials = array();
+foreach( $special_events as $evtype => $values ) {
+  if( !$values['allow-skip'] )
+    $skip_specials[$evtype] = false;
+  else
+    $skip_specials[$evtype] = get_form_var("skip_$evtype", 'string');
+}
+
 // BACK:  we didn't really want to be here - send them to the returl
 if (!empty($back_button))
 {
@@ -516,7 +524,10 @@ if ($rep_type != REP_NONE)
   $reps = mrbsGetRepeatEntryList($starttime,
                                  isset($end_date) ? $end_date : 0,
                                  $rep_type, $rep_opt, $rep_num_weeks,
-                                 $max_rep_entrys);
+				 $max_rep_entrys);
+
+  $special_event_list = get_special_events($start_year, $start_month, $start_day,
+                                           $rep_end_year, $rep_end_month, $rep_end_day);
 }
 
 // When checking for overlaps, for Edit (not New), ignore this entry and series:
@@ -548,26 +559,66 @@ $skipped_bookings = array(); // Holds a list of all the bookings that were skipp
 $rules_broken = array();  // Holds an array of the rules that have been broken
 $skip_lists = array();    // Holds a 2D array of bookings to skip past.  Indexed
                           // by room id and start time
-                          
+
+foreach ( $rooms as $room_id )
+{
+  $skip_lists[$room_id] = array();
+}
+
+// filter out all repetitions that should be skipped because of holidays etc
+if ($rep_type != REP_NONE && !empty($reps))
+{
+  $count = count($reps);
+  for ($i = 0; $i < $count; $i++)
+  {
+    // calculate diff each time and correct where events
+    // cross DST
+    $diff = $duration_seconds;
+    $diff += cross_dst($reps[$i], $reps[$i] + $diff);
+
+    $skip_this = false;
+    foreach ($special_event_list as $evtype => &$list) {
+      if( !$skip_specials[$evtype] )
+	continue;
+
+      foreach($list as $h) {
+	if (($h->getEnd() > $reps[$i]) && ($h->getStart() <= ($reps[$i]+$diff))) {
+	  $start_string = utf8_strftime($strftime_format['date'], $h->getStart());
+	  $end_string = utf8_strftime($strftime_format['date'], $h->getEnd()-1);
+	  $time_string = $start_string === $end_string ? $start_string : $start_string . " - " . $end_string;
+	  $skipped_bookings[] = '<b>' . $h->getProperty('summary') . "</b> ($time_string)";
+	  foreach ( $rooms as $room_id )
+	    $skip_lists[$room_id][] = $reps[$i];
+	  $skip_this = true;
+	}
+      }
+
+      if( $skip_this )
+	break;
+    }
+    if( $skip_this )
+      unset( $reps[$i] );
+  }
+}
+
 // Check for any schedule conflicts in each room we're going to try and
 // book in;  also check that the booking conforms to the policy
 foreach ( $rooms as $room_id )
 {
-  $skip_lists[$room_id] = array();
   if ($rep_type != REP_NONE && !empty($reps))
   {
     if(count($reps) < $max_rep_entrys)
     {
-      for ($i = 0; $i < count($reps); $i++)
+      foreach ($reps as $rep)
       {
         // calculate diff each time and correct where events
         // cross DST
         $diff = $duration_seconds;
-        $diff += cross_dst($reps[$i], $reps[$i] + $diff);
+        $diff += cross_dst($rep, $rep + $diff);
 
         $tmp = mrbsCheckFree($room_id,
-                             $reps[$i],
-                             $reps[$i] + $diff,
+                             $rep,
+                             $rep + $diff,
                              $ignore_id,
                              $repeat_id);
 
@@ -578,7 +629,7 @@ foreach ( $rooms as $room_id )
           // Otherwise it's an invalid booking
           if ($skip)
           {
-	    $skip_lists[$room_id][] = $reps[$i];
+	    $skip_lists[$room_id][] = $rep;
 	    $skipped_bookings = array_merge($skipped_bookings, $tmp);
           }
           else
@@ -591,7 +642,7 @@ foreach ( $rooms as $room_id )
         // conforms to the booking policy
         if (!auth_book_admin($user, $room_id))
         {
-          $errors = mrbsCheckPolicy($reps[$i], $duration_seconds);
+          $errors = mrbsCheckPolicy($rep, $duration_seconds);
           if (count($errors) > 0)
           {
             $valid_booking = FALSE;
@@ -631,6 +682,7 @@ foreach ( $rooms as $room_id )
 
 // Tidy up the lists of conflicts and rules broken, getting rid of duplicates
 $conflicts = array_values(array_unique($conflicts));
+$skipped_bookings = array_values(array_unique($skipped_bookings));
 $rules_broken = array_values(array_unique($rules_broken));
     
 // If this is an Ajax request and if it's not a valid booking which we want
