@@ -347,7 +347,7 @@ function print_theme_header($day, $month, $year, $area, $room)
             defaultOptions.bProcessing = true;
             defaultOptions.bScrollCollapse = true;
             defaultOptions.bStateSave = true;
-            defaultOptions.iDisplayLength = 25;
+            defaultOptions.iDisplayLength = 50;
             defaultOptions.sDom = 'C<"clear">lfrtip';
             defaultOptions.sScrollX = "100%";
             defaultOptions.sPaginationType = "full_numbers";
