@@ -414,7 +414,7 @@ function print_theme_header($day, $month, $year, $area, $room)
               ?>
               defaultOptions.oColReorder = {iFixedColumns: nCols};
             }
-            defaultOptions.oColVis = {aiExclude: colVisExcludeCols};
+            defaultOptions.oColVis.aiExclude = colVisExcludeCols;
             <?php
             // Merge the specific options with the default options.  We do a deep
             // merge.
