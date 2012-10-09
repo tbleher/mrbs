@@ -16,4 +16,9 @@ require_once "dbsys.inc";
 require_once "mrbs_auth.inc";
 require_once "standard_vars.inc.php";
 
+if( $firephp ) {
+	ob_start();
+	require_once "FirePHPCore/fb.php";
+}
+
 ?>
