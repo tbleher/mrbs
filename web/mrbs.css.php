@@ -495,7 +495,7 @@ $general_gap                   = '1.0';     // em  (gap between left and right c
 
 // Specific to the "edit_entry" form
 $edit_entry_left_col_max_width = '20';      // em
-$edit_entry_textarea_width     = '26';      // em
+$edit_entry_textarea_width     = '33';      // em
 $edit_entry_ampm_width         = '16';      // em
 $edit_entry_form_min_width     = $edit_entry_left_col_max_width + $edit_entry_textarea_width + $general_gap;
 $edit_entry_form_min_width     = number_format($edit_entry_form_min_width, 1, '.', '');   // get rid of any commas
@@ -586,7 +586,7 @@ form#edit_room {float: left; width: auto; margin: 0 2em 1em 1em}
 /* font family and size needs to be the same for input and textarea as their widths are defined in ems */
 .form_general textarea {
     display: block; float: left; 
-    width: <?php echo $edit_entry_textarea_width ?>em; height: 11em; 
+    width: <?php echo $edit_entry_textarea_width ?>em; height: 4em; 
     margin-left: <?php echo $general_gap ?>em; margin-bottom: 0.5em;
     font-family: <?php echo $standard_font_family ?>; font-size: small
 }
