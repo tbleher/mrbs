@@ -41,7 +41,8 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   global $strftime_format;
   global $tbl_entry;
   global $select_options;
-  
+  global $view_entry_field_order;
+
   // Get the duration if we haven't got it already
   if (!isset($data['duration']))
   {
@@ -62,6 +63,12 @@ function create_details_body($data, $as_html=FALSE, $keep_private=FALSE, $room_d
   $private_text = "[" . get_vocab("private") . "]";
   
   foreach ($data as $key => $value)
+  {
+    if( ! in_array( $key, $view_entry_field_order ) )
+      $view_entry_field_order[] = $key;
+  }
+
+  foreach ($view_entry_field_order as $key)
   {
     // We could just test each column against $is_private_field["entry.$key"]
     // but restricting the test to the columns below guards against the possibility

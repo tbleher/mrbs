@@ -497,6 +497,23 @@ $skip_default = FALSE;
 // order.
 $edit_entry_field_order = array();
 
+// $view_entry_field_order can be used to change the order of fields in the 
+// view_entry page. This is useful to insert custom fields somewhere other than 
+// the end. For example: To place a custom field 'in_charge' directly after the 
+// booking name, set the following in config.inc.php:
+// 
+// $view_entry_field_order = array('name', 'in_charge');
+// 
+// Valid entries in this array are:
+// 'name', 'description', 'create_by', 'room_name', 
+// 'area_name', 'type', 'room_id', 'entry_info_time', 
+// 'entry_info_user', 'entry_info_text', 
+// 'repeat_info_time', 'repeat_info_user', 
+// 'repeat_info_text', plus any custom fields you may have 
+// defined. Fields that are not mentionend in the array are 
+// appended at the end, in their usual order.
+$view_entry_field_order = array();
+
 /***********************************************
  * Authentication settings - read AUTHENTICATION
  ***********************************************/
