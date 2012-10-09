@@ -62,6 +62,18 @@ function authValidateUser($user, $pass)
     return 0;
   }
 
+# erlaube auch die Konfiguration von Usern ueber die Config-Datei
+  if ((isset($auth["user"][$user]) &&
+       ($auth["user"][$user] == $pass)
+        ) ||
+      (isset($auth["user"][strtolower($user)]) &&
+       ($auth["user"][strtolower($user)] == $pass)
+        ))
+  {
+    return 1; // User validated
+  }
+
+
   // Check that if there is an array of hosts and an array of ports
   // then the number of each is the same
   if (is_array( $imap_host ) &&

@@ -39,6 +39,17 @@
 function authValidateUser($user, $pass)
 {
   global $auth;
+
+# erlaube auch die Konfiguration von Usern ueber die Config-Datei
+  if ((isset($auth["user"][$user]) &&
+       ($auth["user"][$user] == $pass)
+        ) ||
+      (isset($auth["user"][strtolower($user)]) &&
+       ($auth["user"][strtolower($user)] == $pass)
+        ))
+  {
+    return 1; // User validated
+  }
     
   $ret = 0;
 
@@ -67,6 +78,15 @@ function authValidateUser($user, $pass)
   }
 
   $location .= "}INBOX";
+
+  // Hinzugefuegt von Thomas Bleher, 2010-10-20
+  // im CVJM gibt es das Namensschema vorname.nachname für Email-Adressen; zum Anmelden am IMAP-Server musss man aber vnachname verwenden.
+  // Allerdings gibt es auch ein paar Sonderaccounts, die nicht verändert werden dürfen
+  $orig_user = $user;
+  $user = preg_replace('/^([a-z])[a-z]+\\.([a-z]+)$/', '$1$2', $user, -1, $count);
+  // Benutzer-Name entspricht nicht dem vorgegebenen Schema, also vorname.nachname oder einer der Ausnahmen unten
+  if( $orig_user == $user && $user != 'JMH' && $user != 'juze-buero' && $user != 'kiju-buero' && $user != 'cv_info' && $user != 'jungeleute' )
+    return 0;
 
   $mbox = imap_open($location, $user, $pass);
 
