@@ -555,9 +555,17 @@ for ($cday = 1; $cday <= $days_in_month; $cday++)
             echo "error: unknown parameter";
           }
         }
-        echo "<a href=\"$booking_link\" title=\"$full_text\">";
+        if( $room_selected ) {
+	  echo "<a href=\"$booking_link\" title=\"$full_text\">";
+	} else {
+	  echo "<div style='padding-left: 2px;'>";
+	}
         echo ($d[$cday]['is_repeat'][$i]) ? "<img class=\"repeat_symbol\" src=\"images/repeat.png\" alt=\"" . get_vocab("series") . "\" title=\"" . get_vocab("series") . "\" width=\"10\" height=\"10\">" : '';
-        echo "$display_text</a>\n";
+        if( $room_selected ) {
+	  echo "$display_text</a>\n";
+	} else {
+	  echo "$display_text</div>\n";
+	}
 
         if( !$room_selected ) {
           // output all rooms that belong to this booking
