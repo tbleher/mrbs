@@ -6,10 +6,8 @@ require_once "mrbs_sql.inc";
 require_once "functions_view.inc";
 
 // Generates a single button
-function generateButton($form_action, $id, $series, $action_type, $returl, $submit_value, $title='')
+function generateButton($form_action, $id, $series, $action_type, $room_id, $returl, $submit_value, $title='')
 {
-  global $room_id;
-  
   echo "<form action=\"".htmlspecialchars($form_action).
     "?id=$id&amp;series=$series\" method=\"post\">\n";
   echo "<fieldset>\n";
@@ -23,7 +21,7 @@ function generateButton($form_action, $id, $series, $action_type, $returl, $subm
 }
 
 // Generates the Approve, Reject and More Info buttons
-function generateApproveButtons($id, $series)
+function generateApproveButtons($id, $room_id, $series)
 {
   global $returl, $PHP_SELF;
   global $entry_info_time, $entry_info_user, $repeat_info_time, $repeat_info_user;
@@ -48,14 +46,14 @@ function generateApproveButtons($id, $series)
   echo "<tr>\n";
   echo "<td>" . ($series ? get_vocab("series") : get_vocab("entry")) . ":</td>\n";
   echo "<td>\n";
-  generateButton("approve_entry_handler.php", $id, $series, "approve", $returl, get_vocab("approve"));
-  generateButton($this_page, $id, $series, "reject", $returl, get_vocab("reject"));
-  generateButton($this_page, $id, $series, "more_info", $returl, get_vocab("more_info"), $info_title);
+  generateButton("approve_entry_handler.php", $id, $series, "approve", $room_id, $returl, get_vocab("approve"));
+  generateButton($this_page, $id, $series, "reject", $room_id, $returl, get_vocab("reject"));
+  generateButton($this_page, $id, $series, "more_info", $room_id, $returl, get_vocab("more_info"), $info_title);
   echo "</td>\n";
   echo "</tr>\n";
 }
 
-function generateOwnerButtons($id, $series)
+function generateOwnerButtons($id, $room_id, $series)
 {
   global $user, $create_by, $status, $area;
   global $PHP_SELF, $reminders_enabled, $last_reminded, $reminder_interval;
@@ -73,7 +71,7 @@ function generateOwnerButtons($id, $series)
     echo "<tr>\n";
     echo "<td>&nbsp;</td>\n";
     echo "<td>\n";
-    generateButton("approve_entry_handler.php", $id, $series, "remind", $this_page . "?id=$id&amp;area=$area", get_vocab("remind_admin"));
+    generateButton("approve_entry_handler.php", $id, $series, "remind", $room_id, $this_page . "?id=$id&amp;area=$area", get_vocab("remind_admin"));
     echo "</td>\n";
     echo "</tr>\n";
   } 
@@ -347,17 +345,17 @@ if ($approval_enabled && !$room_disabled && ($status & STATUS_AWAITING_APPROVAL)
     {
       if (!$series)
       {
-        generateApproveButtons($id, FALSE);
+        generateApproveButtons($id, $row['room_id'], FALSE);
       }
       if (!empty($repeat_id) || $series)
       {
-        generateApproveButtons($repeat_id, TRUE);
+        generateApproveButtons($repeat_id, $row['room_id'], TRUE);
       }    
     }
     // Buttons for the owner of this booking
     elseif ($user == $create_by)
     {
-      generateOwnerButtons($id, $series);
+      generateOwnerButtons($id, $row['room_id'], $series);
     }
     // Others don't get any buttons
     else

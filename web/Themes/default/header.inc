@@ -81,6 +81,7 @@ function print_theme_header($day, $month, $year, $area, $room)
   global $ajax_refresh_rate;
   global $main_table_cell_border_width, $main_cell_height;
   global $timetohighlight;
+  global $area_admins;
   
   $page = basename($PHP_SELF, ".php");
   $user = getUserName();
@@ -3228,7 +3229,19 @@ $(window).load(function() {
           if (!$is_admin)
           {
             // Ordinary users can only see their own
-            $sql .= " AND create_by='" . addslashes($user) . "'";
+            $sql .= " AND (create_by='" . addslashes($user) . "'";
+
+            $area_admin_list = '';
+	    foreach( $area_admins as $area_id => $admin_list ) {
+	      if( in_array( $user, $admin_list ) ) {
+                if( $area_admin_list !== '' )
+                  $area_admin_list .= ', ';
+		$area_admin_list .= $area_id;
+              }
+	    }
+	    if( $area_admin_list !== '' )
+              $sql .= " OR A.id IN ($area_admin_list)";
+	    $sql .= ")";
           }
           $n_outstanding = sql_query1($sql);
           echo "<div id=\"n_outstanding\"" .

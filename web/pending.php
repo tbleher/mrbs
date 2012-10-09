@@ -28,6 +28,7 @@ function display_buttons($row, $is_series)
     echo "<input type=\"hidden\" name=\"action\" value=\"approve\">\n";
     echo "<input type=\"hidden\" name=\"id\" value=\"$target_id\">\n";
     echo "<input type=\"hidden\" name=\"series\" value=\"$is_series\">\n";
+    echo "<input type=\"hidden\" name=\"room_id\" value=\"" . $row['room_id'] ."\">\n";
     echo "<input type=\"hidden\" name=\"returl\" value=\"" . htmlspecialchars($returl) . "\">\n";
     echo "<input type=\"submit\" value=\"" . get_vocab("approve") . "\">\n";
     echo "</div>\n";
@@ -36,6 +37,7 @@ function display_buttons($row, $is_series)
     echo "<form action=\"view_entry.php?$query_string\" method=\"post\">\n";
     echo "<div>\n";
     echo "<input type=\"hidden\" name=\"action\" value=\"reject\">\n";
+    echo "<input type=\"hidden\" name=\"room_id\" value=\"" . $row['room_id'] ."\">\n";
     echo "<input type=\"hidden\" name=\"returl\" value=\"" . htmlspecialchars($returl) . "\">\n";
     echo "<input type=\"submit\" value=\"" . get_vocab("reject") . "\">\n";
     echo "</div>\n";
@@ -224,7 +226,19 @@ $sql = "SELECT E.id, E.name, E.room_id, E.start_time, E.create_by, " .
 // Ordinary users can only see their own bookings       
 if (!$is_admin)
 {
-  $sql .= " AND E.create_by='" . addslashes($user) . "'";
+  $sql .= " AND (E.create_by='" . addslashes($user) . "'";
+
+  $area_admin_list = '';
+  foreach( $area_admins as $area_id => $admin_list ) {
+    if( in_array( $user, $admin_list ) ) {
+      if( $area_admin_list !== '' )
+	$area_admin_list .= ', ';
+      $area_admin_list .= $area_id;
+    }
+  }
+  if( $area_admin_list !== '' )
+    $sql .= " OR A.id IN ($area_admin_list)";
+  $sql .= ")";
 }
 // We want entries for a series to appear together so that we can display
 // them as a separate table below the main entry for the series. 
